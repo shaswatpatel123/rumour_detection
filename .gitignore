@@ -4,3 +4,4 @@ GCN/
 data/
 __pycache__/
 model/
+logger/**

@@ -1,5 +1,5 @@
 import copy
-from errno import EALREADY
+import time
 import os
 from pathlib import PurePath
 from tqdm import tqdm
@@ -177,6 +177,7 @@ def early_RD_comment(model, topic, save_dir):
         pickle.dump(total, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+START_TIME = time.time()
 AVG_RESULTS = {}
 for train, test in kf.split(directories):
 
@@ -339,6 +340,7 @@ for train, test in kf.split(directories):
     early_RD_comment(BEST_MODEL, PurePath(
         directories[test[0]]).parts[-1], CURR_PATH)
 
+END_TIME = time.time()
 
 acc, prec, recall, f1 = 0, 0, 0, 0
 for key, val in AVG_RESULTS.items():
@@ -354,6 +356,8 @@ with open(os.path.join(PATH, "average_results.json"), "w") as jf:
     json.dump({"Accuracy": acc / 9, "Precision": prec / 9,
               "Recall": recall / 9, "F1 score": f1 / 9}, jf)
 
+
+print("TOTAL RUN TIME: ", (END_TIME - START_TIME)/60)
 
 total_early_time = {
     "loss": 0,
