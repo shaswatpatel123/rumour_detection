@@ -1,0 +1,6 @@
+model_unaugmented/
+model_unaugmented3/
+GCN/
+data/
+__pycache__/
+model/
