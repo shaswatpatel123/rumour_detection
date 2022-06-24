@@ -685,6 +685,9 @@ def dataAugmentation(data_list, num, rem, p_commets_aug=0.15):
     return graphList
 
 
+print()
+print("Augmented data")
+print()
 AUG_PERC = 0.15
 augmented_save_path = os.path.join(SAVE_DIR, "augmented")
 os.makedirs(augmented_save_path, exist_ok=True)
@@ -837,6 +840,9 @@ def dataAugmentation(data_list, num, rem, p_commets_aug=0.15):
     return graphList
 
 
+print()
+print("Improved Augmented data")
+print()
 AUG_PERC = 0.15
 
 data = {}
