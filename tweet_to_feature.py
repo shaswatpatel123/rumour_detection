@@ -144,8 +144,6 @@ for idx, i in enumerate(directories):
     print(f"{(idx + 1)}. {PurePath(i).parts[-1].split('-')[0]}")
 print("*" * 60)
 
-directories = [directories[1]]
-
 # Traverse through it to get Source Tweet and Reaction Tweet
 data = {}
 for dir in directories:
