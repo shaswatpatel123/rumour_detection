@@ -22,7 +22,6 @@ random.seed(12345)
 np.random.seed(12345)
 
 tokenizer = TweetTokenizer()
-
 if len(sys.argv) >= 2:
     DATA_PATH = sys.argv[1]
 else:
@@ -31,7 +30,12 @@ else:
 if len(sys.argv) >= 3:
     SAVE_DIR = sys.argv[2]
 else:
-    SAVE_DIR = "./data/pheme9/"
+    SAVE_DIR = "./data/pheme9"
+
+if len(sys.argv) >= 4:
+    TWEET_FEAT_DIR = sys.argv[3]
+else:
+    TWEET_FEAT_DIR = "./data/pheme9"
 
 
 def normalizeToken(token):
@@ -132,6 +136,9 @@ class FEATUREEXTRACTOR:
 
 feature_extractor = FEATUREEXTRACTOR("vinai/bertweet-base", "cuda")
 
+with open(os.path.join(TWEET_FEAT_DIR, "tweet_features.pickle"), "rb") as handle:
+    TWEET_FEAT = pickle.load(handle)
+
 
 def create_graph_with_map(structure_json, id):
     structure_json = {id: structure_json[id]}
@@ -167,9 +174,11 @@ def create_feature_matrix(source_json, reaction_json, nodeToIndexMap, nodeToInde
     tweets = source_json
     tweets.update(reaction_json)
     feature_matrix = []
+    tweet_id_list = []
     for tweet_id in nodeToIndexMapArray:
         feature_matrix.append(get_features(tweets[tweet_id], tweet_id))
-    return feature_matrix
+        tweet_id_list.append(tweet_id)
+    return feature_matrix, tweet_id_list
 
 
 args = {
@@ -186,6 +195,8 @@ print("Number of Events: ", len(directories))
 for idx, i in enumerate(directories):
     print(f"{(idx + 1)}. {PurePath(i).parts[-1].split('-')[0]}")
 print("*" * 60)
+
+directories = [directories[1], directories[6]]
 
 # Traverse through it to get Source Tweet and Reaction Tweet
 data = {}
@@ -263,7 +274,7 @@ for dir in directories:
 
                 reaction_json[reaction_id] = obj
 
-            tweetData["featureMatrix"] = create_feature_matrix(
+            tweetData["featureMatrix"], tweetData["tweetIDList"] = create_feature_matrix(
                 source_json, reaction_json, nodeToIndexMap, nodeToIndexMapArray)
 
             # Write in the saving path as id.json
@@ -424,14 +435,14 @@ for timiLimit in [0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 
                 edgeList, nodeToIndexMap, nodeToIndexMapArray = create_graph_with_map_timeoffset(
                     structure_json, id, source_json, reaction_json, timiLimit)
-                featureMatrix = create_feature_matrix(
+                featureMatrix, tweetMatrix = create_feature_matrix(
                     source_json, reaction_json, nodeToIndexMap, nodeToIndexMapArray)
 
                 features = []
                 for i, j in enumerate(featureMatrix):
-                    local_features = []
-                    local_features.extend(
-                        feature_extractor.get_bert_features(j[0]))
+                    # local_features = []
+                    # local_features.extend(feature_extractor.get_bert_features(j[0]))
+                    local_features = TWEET_FEAT[tweetMatrix[i]]
                     local_features.extend(j[1:])  # Social features
                     features.append(local_features)
 
@@ -515,14 +526,14 @@ for commentLimit in comment_list:
 
                 edgeList, nodeToIndexMap, nodeToIndexMapArray = create_graph_with_map_comment(
                     structure_json, id, source_json, reaction_json, commentLimit)
-                featureMatrix = create_feature_matrix(
+                featureMatrix, tweetMatrix = create_feature_matrix(
                     source_json, reaction_json, nodeToIndexMap, nodeToIndexMapArray)
 
                 features = []
                 for i, j in enumerate(featureMatrix):
-                    local_features = []
-                    local_features.extend(
-                        feature_extractor.get_bert_features(j[0]))
+                    # local_features = []
+                    # local_features.extend(feature_extractor.get_bert_features(j[0]))
+                    local_features = TWEET_FEAT[tweetMatrix[i]]
                     local_features.extend(j[1:])  # Social features
                     features.append(local_features)
 
@@ -566,10 +577,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             edge_list = np.array(edge_list).T.tolist()
 
             features = []
+            tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
-                local_features = []
-                local_features.extend(
-                    feature_extractor.get_bert_features(j[0]))
+                local_features = TWEET_FEAT[tweetMatrix[i]]
                 local_features.extend(j[1:])  # Social features
                 features.append(local_features)
 
@@ -597,10 +607,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
 def getGData(tweet_data, augmented_data):
     gdata = {}
     features = []
-    for i, j in enumerate(augmented_data['featureMatrix']):
-        local_features = []
-        local_features.extend(
-            feature_extractor.get_bert_features(normalizeTweet(j[0])))
+    tweetMatrix = data["tweetIDList"]
+    for i, j in enumerate(data['featureMatrix']):
+        local_features = TWEET_FEAT[tweetMatrix[i]]
         local_features.extend(j[1:])  # Social features
         features.append(local_features)
 
@@ -704,10 +713,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             edge_list = np.array(edge_list).T.tolist()
 
             features = []
+            tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
-                local_features = []
-                local_features.extend(
-                    feature_extractor.get_bert_features(j[0]))
+                local_features = TWEET_FEAT[tweetMatrix[i]]
                 local_features.extend(j[1:])  # Social features
                 features.append(local_features)
 
@@ -749,25 +757,6 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
         pickle.dump(graphList, handle, protocol=pickle.HIGHEST_PROTOCOL)
     print("\n")
     print("*" * 60)
-
-
-def getGData(tweet_data, augmented_data):
-    gdata = {}
-    features = []
-    for i, j in enumerate(augmented_data['featureMatrix']):
-        local_features = []
-        local_features.extend(feature_extractor.get_bert_features(j[0]))
-        local_features.extend(j[1:])  # Social features
-        features.append(local_features)
-
-    gdata['x'] = features
-    gdata['y'] = tweet_data['label']
-
-    edge_list = tweet_data["edgeList"]
-    edge_list = np.array(edge_list).T.tolist()
-    gdata['edge_list'] = edge_list
-
-    return gdata
 
 
 def get_probability_for_tweets_selection(thread):
@@ -877,10 +866,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             edge_list = np.array(edge_list).T.tolist()
 
             features = []
+            tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
-                local_features = []
-                local_features.extend(
-                    feature_extractor.get_bert_features(j[0]))
+                local_features = TWEET_FEAT[tweetMatrix[i]]
                 local_features.extend(j[1:])  # Social features
                 features.append(local_features)
 

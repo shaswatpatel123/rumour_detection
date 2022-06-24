@@ -11,7 +11,12 @@ wget https://ndownloader.figshare.com/articles/6392078/versions/1
 unzip ./1
 tar -xf ./PHEME_veracity.tar.bz2
 
+rm -rf ./PHEME_veracity.tar.bz2
+rm -rf ./1
+
 mkdir -p logger
+
+python ./tweet_to_feature.py ./all-rnr-annotated-threads ./data/pheme9
 
 python ./data_prep_3label.py ./all-rnr-annotated-threads ./data/pheme9/3label > ./logger/3labelprep.txt
 python ./main_3label.py ./data/pheme9/3label/unaugmented ./data/pheme9/3label ./model/pheme9/3label/unaugmented/ GCN 100 > ./logger/unaugmented_3label_gcn.txt
