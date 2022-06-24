@@ -438,11 +438,9 @@ for timiLimit in [0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 
                 features = []
                 for i, j in enumerate(featureMatrix):
-                    # local_features = []
-                    # local_features.extend(feature_extractor.get_bert_features(j[0]))
-                    local_features = TWEET_FEAT[tweetMatrix[i]]
-                    local_features.extend(j[1:])  # Social features
-                    features.append(local_features)
+                    text_feat = TWEET_FEAT[tweetMatrix[i]]
+                    social_feat = j[1:]
+                    features.append([*text_feat, *social_feat])
 
                 gdata = {}
                 gdata['x'] = features
@@ -529,11 +527,9 @@ for commentLimit in comment_list:
 
                 features = []
                 for i, j in enumerate(featureMatrix):
-                    # local_features = []
-                    # local_features.extend(feature_extractor.get_bert_features(j[0]))
-                    local_features = TWEET_FEAT[tweetMatrix[i]]
-                    local_features.extend(j[1:])  # Social features
-                    features.append(local_features)
+                    text_feat = TWEET_FEAT[tweetMatrix[i]]
+                    social_feat = j[1:]
+                    features.append([*text_feat, *social_feat])
 
                 gdata = {}
                 gdata['x'] = features
@@ -577,9 +573,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             features = []
             tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
-                local_features = TWEET_FEAT[tweetMatrix[i]]
-                local_features.extend(j[1:])  # Social features
-                features.append(local_features)
+                text_feat = TWEET_FEAT[tweetMatrix[i]]
+                social_feat = j[1:]
+                features.append([*text_feat, *social_feat])
 
             gdata['x'] = features
             gdata['y'] = data["label"]
@@ -717,9 +713,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             features = []
             tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
-                local_features = TWEET_FEAT[tweetMatrix[i]]
-                local_features.extend(j[1:])  # Social features
-                features.append(local_features)
+                text_feat = TWEET_FEAT[tweetMatrix[i]]
+                social_feat = j[1:]
+                features.append([*text_feat, *social_feat])
 
             gdata['x'] = features
             gdata['y'] = data["label"]
@@ -877,9 +873,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             features = []
             tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
-                local_features = TWEET_FEAT[tweetMatrix[i]]
-                local_features.extend(j[1:])  # Social features
-                features.append(local_features)
+                text_feat = TWEET_FEAT[tweetMatrix[i]]
+                social_feat = j[1:]
+                features.append([*text_feat, *social_feat])
 
             gdata['x'] = features
             gdata['y'] = data["label"]
