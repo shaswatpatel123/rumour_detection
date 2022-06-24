@@ -196,8 +196,6 @@ for idx, i in enumerate(directories):
     print(f"{(idx + 1)}. {PurePath(i).parts[-1].split('-')[0]}")
 print("*" * 60)
 
-directories = [directories[1], directories[6]]
-
 # Traverse through it to get Source Tweet and Reaction Tweet
 data = {}
 for dir in directories:
@@ -607,9 +605,10 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
 def getGData(tweet_data, augmented_data):
     gdata = {}
     features = []
-    tweetMatrix = data["tweetIDList"]
-    for i, j in enumerate(data['featureMatrix']):
-        local_features = TWEET_FEAT[tweetMatrix[i]]
+    for i, j in enumerate(augmented_data['featureMatrix']):
+        local_features = []
+        local_features.extend(
+            feature_extractor.get_bert_features(normalizeTweet(j[0])))
         local_features.extend(j[1:])  # Social features
         features.append(local_features)
 

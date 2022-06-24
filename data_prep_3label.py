@@ -509,8 +509,6 @@ for timiLimit in [0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 
                 features = []
                 for i, j in enumerate(featureMatrix):
-                    # local_features = []
-                    # local_features.extend(feature_extractor.get_bert_features(j[0]))
                     local_features = TWEET_FEAT[tweetMatrix[i]]
                     local_features.extend(j[1:])  # Social features
                     features.append(local_features)
@@ -611,8 +609,6 @@ for commentLimit in comment_list:
 
                 features = []
                 for i, j in enumerate(featureMatrix):
-                    # local_features = []
-                    # local_features.extend(feature_extractor.get_bert_features(j[0]))
                     local_features = TWEET_FEAT[tweetMatrix[i]]
                     local_features.extend(j[1:])  # Social features
                     features.append(local_features)
@@ -692,9 +688,10 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
 def getGData(tweet_data, augmented_data):
     gdata = {}
     features = []
-    tweetMatrix = data["tweetIDList"]
-    for i, j in enumerate(data['featureMatrix']):
-        local_features = TWEET_FEAT[tweetMatrix[i]]
+    for i, j in enumerate(augmented_data['featureMatrix']):
+        local_features = []
+        local_features.extend(
+            feature_extractor.get_bert_features(normalizeTweet(j[0])))
         local_features.extend(j[1:])  # Social features
         features.append(local_features)
 
