@@ -790,8 +790,12 @@ def nlpAugmentation(json_file, num, p_commets_aug=0.15):
 
         feature_index_choosen = []
         for _ in range(num):
-            feature_index_choosen.extend(
-                random.choices(feature_index, weights=probs, k=k))
+            if sum(probs) != 0:
+                feature_index_choosen.extend(
+                    random.choices(feature_index, weights=probs, k=k))
+            else:
+                feature_index_choosen.extend(
+                    random.choices(feature_index, k=k))
 
         tweets = [data["featureMatrix"][i][0] for i in feature_index_choosen]
 

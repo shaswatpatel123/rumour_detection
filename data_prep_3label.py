@@ -889,10 +889,10 @@ def nlpAugmentation(json_file, num, p_commets_aug=0.15):
     # Extract 0.15% of comments to augment
     probs = get_probability_for_tweets_selection(data)
 
-    if sum(probs) == 0:
-        print(probs)
+    # if sum(probs) == 0:
+    #     print(probs)
 
-        print( data )
+    #     print(data)
 
     k = int(ceil((len(data["featureMatrix"]) - 1) * p_commets_aug))
     feature_index = [i for i in range(1, len(data["featureMatrix"]))]
@@ -963,10 +963,6 @@ os.makedirs(improved_data_save_path, exist_ok=True)
 data = {}
 AUG_PERC = 0.15
 for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
-
-    if event != "germanwings":
-        continue
-
     print("\n")
     print("*" * 60)
     print(event)
