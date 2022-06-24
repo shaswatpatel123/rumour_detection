@@ -439,8 +439,15 @@ for timiLimit in [0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
                 features = []
                 for i, j in enumerate(featureMatrix):
                     text_feat = TWEET_FEAT[tweetMatrix[i]]
+                    if len(text_feat) > 768:
+                        print(len(text_feat))
+                        raise "Error time 768"
                     social_feat = j[1:]
                     features.append([*text_feat, *social_feat])
+
+                    if len(features[-1]) > 772:
+                        print(len(features[-1]))
+                        raise "Error time 772"
 
                 gdata = {}
                 gdata['x'] = features
@@ -528,8 +535,15 @@ for commentLimit in comment_list:
                 features = []
                 for i, j in enumerate(featureMatrix):
                     text_feat = TWEET_FEAT[tweetMatrix[i]]
+                    if len(text_feat) > 768:
+                        print(len(text_feat))
+                        raise "Error time 768"
                     social_feat = j[1:]
                     features.append([*text_feat, *social_feat])
+
+                    if len(features[-1]) > 772:
+                        print(len(features[-1]))
+                        raise "Error time 772"                    
 
                 gdata = {}
                 gdata['x'] = features
@@ -574,8 +588,16 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
                 text_feat = TWEET_FEAT[tweetMatrix[i]]
+                if len(text_feat) > 768:
+                    print(len(text_feat))
+                    raise "Error time 768"
                 social_feat = j[1:]
                 features.append([*text_feat, *social_feat])
+
+                if len(features[-1]) > 772:
+                    print(len(features[-1]))
+                    raise "Error time 772"
+
 
             gdata['x'] = features
             gdata['y'] = data["label"]
@@ -602,11 +624,9 @@ def getGData(tweet_data, augmented_data):
     gdata = {}
     features = []
     for i, j in enumerate(augmented_data['featureMatrix']):
-        local_features = []
-        local_features.extend(
-            feature_extractor.get_bert_features(normalizeTweet(j[0])))
-        local_features.extend(j[1:])  # Social features
-        features.append(local_features)
+        text_feat = feature_extractor.get_bert_features(normalizeTweet(j[0]) )
+        social_feat = j[1:]  # Social features
+        features.append( [*text_feat, *social_feat] )
 
     gdata['x'] = features
     gdata['y'] = tweet_data['label']
@@ -714,8 +734,15 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
                 text_feat = TWEET_FEAT[tweetMatrix[i]]
+                if len(text_feat) > 768:
+                    print(len(text_feat))
+                    raise "Error time 768"
                 social_feat = j[1:]
                 features.append([*text_feat, *social_feat])
+
+                if len(features[-1]) > 772:
+                    print(len(features[-1]))
+                    raise "Error time 772"
 
             gdata['x'] = features
             gdata['y'] = data["label"]
@@ -874,8 +901,15 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             tweetMatrix = data["tweetIDList"]
             for i, j in enumerate(data['featureMatrix']):
                 text_feat = TWEET_FEAT[tweetMatrix[i]]
+                if len(text_feat) > 768:
+                    print(len(text_feat))
+                    raise "Error time 768"
                 social_feat = j[1:]
                 features.append([*text_feat, *social_feat])
+
+                if len(features[-1]) > 772:
+                    print(len(features[-1]))
+                    raise "Error time 772"
 
             gdata['x'] = features
             gdata['y'] = data["label"]
