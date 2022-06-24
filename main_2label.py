@@ -26,7 +26,6 @@ warnings.filterwarnings('ignore')
 torch.manual_seed(12345)
 random.seed(12345)
 np.random.seed(12345)
-torch.use_deterministic_algorithms(True)
 
 if len(sys.argv) >= 2:
     DATASET_PATH = sys.argv[1]
