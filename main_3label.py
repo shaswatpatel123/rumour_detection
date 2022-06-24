@@ -9,7 +9,6 @@ import random
 import numpy as np
 
 import matplotlib.pyplot as plt
-from main_2label import END_TIME, START_TIME
 from sklearn.model_selection import KFold
 import tabulate
 
