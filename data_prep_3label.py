@@ -889,7 +889,10 @@ def nlpAugmentation(json_file, num, p_commets_aug=0.15):
     # Extract 0.15% of comments to augment
     probs = get_probability_for_tweets_selection(data)
 
-    print(probs)
+    if sum(probs) == 0:
+        print(probs)
+
+        print( data )
 
     k = int(ceil((len(data["featureMatrix"]) - 1) * p_commets_aug))
     feature_index = [i for i in range(1, len(data["featureMatrix"]))]
