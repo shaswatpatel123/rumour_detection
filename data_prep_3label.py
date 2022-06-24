@@ -889,6 +889,8 @@ def nlpAugmentation(json_file, num, p_commets_aug=0.15):
     # Extract 0.15% of comments to augment
     probs = get_probability_for_tweets_selection(data)
 
+    print(probs)
+
     k = int(ceil((len(data["featureMatrix"]) - 1) * p_commets_aug))
     feature_index = [i for i in range(1, len(data["featureMatrix"]))]
 
@@ -896,8 +898,12 @@ def nlpAugmentation(json_file, num, p_commets_aug=0.15):
 
         feature_index_choosen = []
         for _ in range(num):
-            feature_index_choosen.extend(
-                random.choices(feature_index, weights=probs, k=k))
+            if sum(probs) != 0:
+                feature_index_choosen.extend(
+                    random.choices(feature_index, weights=probs, k=k))
+            else:
+                feature_index_choosen.extend(
+                    random.choices(feature_index, k=k))
 
         tweets = [data["featureMatrix"][i][0] for i in feature_index_choosen]
 
@@ -932,12 +938,14 @@ def nlpAugmentation(json_file, num, p_commets_aug=0.15):
 def dataAugmentation(data_list, num, rem, p_commets_aug=0.15):
     graphList = []
     if num >= 1:
-        for tweet in data_list:
+        print("NUM")
+        for tweet in tqdm(data_list):
             augmented_data = nlpAugmentation(tweet, num, p_commets_aug)
             graphList.extend(augmented_data)
 
     rem_data = random.sample(data_list, rem)
-    for tweet in rem_data:
+    print("REM")
+    for tweet in tqdm(rem_data):
         augmented_data = nlpAugmentation(tweet, 1, p_commets_aug)
         graphList.extend(augmented_data)
 
@@ -952,6 +960,10 @@ os.makedirs(improved_data_save_path, exist_ok=True)
 data = {}
 AUG_PERC = 0.15
 for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
+
+    if event != "germanwings":
+        continue
+
     print("\n")
     print("*" * 60)
     print(event)
