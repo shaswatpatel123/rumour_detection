@@ -772,6 +772,9 @@ def dataAugmentation(data_list, num, rem, p_commets_aug=0.15):
     return graphList
 
 
+print()
+print("Augmented data")
+print()
 AUG_PERC = 0.15
 augmented_save_path = os.path.join(SAVE_DIR, "augmented")
 os.makedirs(augmented_save_path, exist_ok=True)
@@ -941,6 +944,9 @@ def dataAugmentation(data_list, num, rem, p_commets_aug=0.15):
     return graphList
 
 
+print()
+print("Improved Augmented data")
+print()
 improved_data_save_path = os.path.join(SAVE_DIR, "improved")
 os.makedirs(improved_data_save_path, exist_ok=True)
 data = {}
@@ -1013,7 +1019,6 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
             f"\nAugmenting entire False labelled tweets {num - 1} and randomly audmenting {rem} tweets")
 
         graphList.extend(dataAugmentation(falseLabel, num - 1, rem, AUG_PERC))
-        # print( num, k, len(feature_index), len(feature_index_choosen), len(data["featureMatrix"]))
 
     if len(unverifiedLabel) < maximum and len(unverifiedLabel) != 0:
         num = floor(maximum / len(unverifiedLabel))

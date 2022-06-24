@@ -1,3 +1,4 @@
+from ast import ExtSlice
 from nltk.tokenize import TweetTokenizer
 from emoji import demojize
 import re
@@ -186,5 +187,6 @@ for dir in directories:
     print("\n")
     print("*" * 60)
 
+os.makedirs(os.path.join(SAVE_DIR), exist_ok=True)
 with open(os.path.join(SAVE_DIR, "tweet_features.pickle"), "wb") as handle:
     pickle.dump(data, handle)
