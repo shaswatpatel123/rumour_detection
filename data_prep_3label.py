@@ -689,27 +689,27 @@ feature_extractor = FEATUREEXTRACTOR("vinai/bertweet-base", "cuda")
 #     print("*" * 60)
 
 
-# def getGData(tweet_data, augmented_data):
-#     gdata = {}
-#     features = []
-#     tweetMatrix = data["tweetIDList"]
-#     for i, j in enumerate(data['featureMatrix']):
-#         local_features = TWEET_FEAT[tweetMatrix[i]]
-#         local_features.extend(j[1:])  # Social features
-#         features.append(local_features)
+def getGData(tweet_data, augmented_data):
+    gdata = {}
+    features = []
+    tweetMatrix = data["tweetIDList"]
+    for i, j in enumerate(data['featureMatrix']):
+        local_features = TWEET_FEAT[tweetMatrix[i]]
+        local_features.extend(j[1:])  # Social features
+        features.append(local_features)
 
-#     gdata['x'] = features
-#     gdata['y'] = tweet_data['label']
+    gdata['x'] = features
+    gdata['y'] = tweet_data['label']
 
-#     edge_list = tweet_data["edgeList"]
-#     edge_list = np.array(edge_list).T.tolist()
-#     gdata['edge_list'] = edge_list
+    edge_list = tweet_data["edgeList"]
+    edge_list = np.array(edge_list).T.tolist()
+    gdata['edge_list'] = edge_list
 
-#     return gdata
+    return gdata
 
 
-# aug = naw.ContextualWordEmbsAug(
-#     model_path='vinai/bertweet-base', aug_p=0.30, device="cuda", stopwords=["@USER", "HTTPURL"])
+aug = naw.ContextualWordEmbsAug(
+    model_path='vinai/bertweet-base', aug_p=0.30, device="cuda", stopwords=["@USER", "HTTPURL"])
 
 
 # def nlpAugmentation(json_file, num, p_commets_aug=0.15):
@@ -865,20 +865,20 @@ feature_extractor = FEATUREEXTRACTOR("vinai/bertweet-base", "cuda")
 #     print("\n")
 #     print("*" * 60)
 
-# tk = TweetTokenizer()
+tk = TweetTokenizer()
 
 
-# def get_probability_for_tweets_selection(thread):
-#     probs = []
-#     for tweet in thread["featureMatrix"]:
-#         strToken = normalizeTweet(tweet[0])
-#         strToken = strToken.replace("@USER", "").replace("HTTPURL", "")
-#         strToken = tk.tokenize(strToken)
-#         probs.append(len(strToken))
+def get_probability_for_tweets_selection(thread):
+    probs = []
+    for tweet in thread["featureMatrix"]:
+        strToken = normalizeTweet(tweet[0])
+        strToken = strToken.replace("@USER", "").replace("HTTPURL", "")
+        strToken = tk.tokenize(strToken)
+        probs.append(len(strToken))
 
-#     probs.pop(0)  # Remove source
+    probs.pop(0)  # Remove source
 
-#     return probs
+    return probs
 
 
 def nlpAugmentation(json_file, num, p_commets_aug=0.15):
