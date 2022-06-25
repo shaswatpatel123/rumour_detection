@@ -16,6 +16,9 @@ import torch
 from torch_geometric import utils
 from torch_geometric.data import Data, DataLoader
 
+from early_data_3label import *
+from feature_extractor import *
+
 from gcn import *
 from gat import *
 import sys
@@ -33,32 +36,38 @@ else:
     DATASET_PATH = "./data/pheme9/3label"
 
 if len(sys.argv) >= 3:
-    EARLY_DIR = sys.argv[2]
-else:
-    EARLY_DIR = "./data/pheme9/3label"
-
-if len(sys.argv) >= 4:
-    SAVE_DIR = sys.argv[3]
+    SAVE_DIR = sys.argv[2]
 else:
     SAVE_DIR = "./models/3label"
 
-if len(sys.argv) >= 5:
-    MODEL = sys.argv[4]
+if len(sys.argv) >= 4:
+    MODEL = sys.argv[3]
 else:
     MODEL = "GCN"
 
-if len(sys.argv) >= 6:
-    EPOCH = int(sys.argv[5])
+if len(sys.argv) >= 5:
+    EPOCH = int(sys.argv[4])
 else:
     EPOCH = 100
 
+if len(sys.argv) >= 6:
+    PHEME_DATASET = sys.argv[5]
+else:
+    PHEME_DATASET = "./data/pheme9/3label/pheme"
+
+if len(sys.argv) >= 7:
+    TWEET_FEAT_DIR = sys.argv[6]
+else:
+    TWEET_FEAT_DIR = "./"
+
 args = {
     "path": DATASET_PATH,
-    "early_dir": EARLY_DIR,
     "num_of_node_features": 772,
     "batch": 128,
     "save_dir": SAVE_DIR
 }
+
+global_feature_extractor = FEATUREEXTRACTOR("vinai/bertweet-base", "cuda")
 
 BATCH_SIZE = int(args["batch"])
 PATH = args["save_dir"]
@@ -73,6 +82,8 @@ os.makedirs(PATH, exist_ok=True)
 # Get the name of all the folders in the parent folder.
 directories = [os.path.join(args["path"], o) for o in os.listdir(
     args["path"]) if os.path.isdir(os.path.join(args["path"], o))]
+
+
 kf = KFold(n_splits=len(directories))
 
 
@@ -84,20 +95,18 @@ def printTable(metric_score):
     print(table)
 
 
-def early_RD(model, topic, save_dir):
+with open(os.path.join(TWEET_FEAT_DIR, "tweet_features.pickle"), "rb") as handle:
+    TWEET_FEAT = pickle.load(handle)
 
-    pickle_data = os.path.join(args["early_dir"], f"time.pickle")
-    with open(pickle_data, "rb") as handle:
-        time_data = pickle.load(handle)
+
+def early_RD(model, topic, save_dir):
 
     total = {}
 
+    print("Early RD Time")
     for hour in tqdm([0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 36]):
-        timeLimit = hour*3600
-        test_data = time_data[timeLimit]
-
-        test_data = test_data[topic]
-        test_list = []
+        test_data = getEarlyRDTime3Label(
+            hour, PHEME_DATASET, topic, TWEET_FEAT, global_feature_extractor)
 
         for graph in test_data:
             x = torch.tensor(graph['x'], dtype=torch.float)
@@ -133,19 +142,13 @@ def early_RD(model, topic, save_dir):
 
 def early_RD_comment(model, topic, save_dir):
 
-    pickle_data = os.path.join(args["early_dir"], f"comments.pickle")
-    with open(pickle_data, "rb") as handle:
-        comemnts_data = pickle.load(handle)
-
     total = {}
-
+    print("Early RD Comment")
     comment_list = [i for i in range(2, 52, 2)]
     comment_list.append(1)
     for commentLimit in tqdm(comment_list):
-
-        test_data = comemnts_data[commentLimit]
-        test_data = test_data[topic]
-        test_list = []
+        test_data = getEarlyRDComment3Label(
+            commentLimit, PHEME_DATASET, topic, TWEET_FEAT, global_feature_extractor)
 
         for graph in test_data:
             x = torch.tensor(graph['x'], dtype=torch.float)
@@ -181,6 +184,7 @@ def early_RD_comment(model, topic, save_dir):
 
 START_TIME = time.time()
 AVG_RESULTS = {}
+PER_EPOCH_RESULTS = {}
 for train, test in kf.split(directories):
 
     CURR_PATH = os.path.join(PATH, PurePath(directories[test[0]]).parts[-1])
@@ -200,6 +204,8 @@ for train, test in kf.split(directories):
     AVG_RESULTS[avg_key]["precision"] = 0
     AVG_RESULTS[avg_key]["recall"] = 0
     AVG_RESULTS[avg_key]["f1score"] = 0
+
+    PER_EPOCH_RESULTS[avg_key] = []
 
     unverified, tru, fal = 0, 0, 0
     for i in train:
@@ -302,6 +308,13 @@ for train, test in kf.split(directories):
         progressBar.set_description(
             f'Epoch: {epoch:03d}, Training loss : {loss:.4f}, Testing loss : {test_loss:.4f}, Train Acc: {train_acc*100:.2f}, Test Acc: {test_acc*100:.2f}, Test precision: {test_prec}, Test recall: {test_recall}, Test f1 score: {test_f1}')
 
+        res = {
+            "loss": test_loss,
+            "acc": test_acc,
+            "precision": test_prec,
+            "recall": test_recall,
+            "f1score": test_f1
+        }
         if AVG_RESULTS[avg_key]["f1score"] <= test_f1:
             AVG_RESULTS[avg_key]["loss"] = test_loss
             AVG_RESULTS[avg_key]["acc"] = test_acc
@@ -311,6 +324,7 @@ for train, test in kf.split(directories):
             BEST_MODEL = copy.deepcopy(model)
             # torch.save(model, os.path.join(CURR_PATH, "model.pt"))
 
+        PER_EPOCH_RESULTS[avg_key].append(res)
         GLOBAL_LOSS.append(loss)
         GLOBAL_VAL_LOSS.append(test_loss)
         GLOBAL_TRAIN_ACC.append(train_acc * 100)
@@ -350,6 +364,9 @@ for train, test in kf.split(directories):
 
 END_TIME = time.time()
 
+with open(os.path.join(PATH, "per_epoch_results.json"), "w") as jf:
+    json.dump(PER_EPOCH_RESULTS, jf)
+
 acc, prec, recall, f1 = 0, 0, 0, 0
 for key, val in AVG_RESULTS.items():
     acc = acc + val["acc"]
@@ -366,25 +383,11 @@ with open(os.path.join(PATH, "average_results.json"), "w") as jf:
 
 print("TOTAL RUN TIME: ", (END_TIME - START_TIME)/60)
 
-total_early_time = {
-    "loss": 0,
-    "acc": 0,
-    "precision": 0,
-    "recall": 0,
-    "f1 score": 0
-}
-
-total_early_comment = {
-    "loss": 0,
-    "acc": 0,
-    "precision": 0,
-    "recall": 0,
-    "f1 score": 0
-}
-
+total_early_time, total_early_comment = {}, {}
 for d in directories:
+    event = PurePath(d).parts[-1]
 
-    CURR_PATH = os.path.join(PATH, PurePath(d).parts[-1])
+    CURR_PATH = os.path.join(PATH, event)
 
     with open(os.path.join(CURR_PATH, "time_result.pickle"), "rb") as handle:
         time_data = pickle.load(handle)
@@ -393,23 +396,40 @@ for d in directories:
         comment_data = pickle.load(handle)
 
     for hour in tqdm([0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 36]):
+        total_early_time[hour] = {
+            "loss": 0,
+            "acc": 0,
+            "precision": 0,
+            "recall": 0,
+            "f1 score": 0
+        }
+
         metrics = time_data[hour]
 
         for k, v in metrics.items():
-            total_early_time[k] = total_early_time[k] + metrics[k]
+            total_early_time[hour][k] = total_early_time[hour][k] + metrics[k]
 
     comment_list = [i for i in range(2, 52, 2)]
     comment_list.append(1)
     for commentLimit in tqdm(comment_list):
+        total_early_comment[commentLimit] = {
+            "loss": 0,
+            "acc": 0,
+            "precision": 0,
+            "recall": 0,
+            "f1 score": 0
+        }
         metrics = comment_data[commentLimit]
         for k, v in metrics.items():
-            total_early_comment[k] = total_early_comment[k] + metrics[k]
+            total_early_comment[commentLimit][k] = total_early_comment[commentLimit][k] + metrics[k]
 
 for k, v in total_early_time.items():
-    total_early_time[k] = total_early_time[k] / 9
+    for m, vv in v.items():
+        total_early_time[k][m] = total_early_time[k][m] / 9
 
 for k, v in total_early_comment.items():
-    total_early_comment[k] = total_early_comment[k] / 9
+    for m, vv in v.items():
+        total_early_comment[k][m] = total_early_comment[k][m] / 9
 
 with open(os.path.join(PATH, f"average_time_result.pickle"), "wb") as handle:
     pickle.dump(total_early_time, handle, protocol=pickle.HIGHEST_PROTOCOL)
