@@ -47,7 +47,7 @@ def getEarlyRDTime2Label(timeLimit, pheme_data, event, TWEET_FEAT, feature_extra
                 structure_json, id, source_json, reaction_json, timeLimit)
 
             featureMatrix, tweetMatrix = create_feature_matrix(
-                source_json, reaction_json, nodeToIndexMap, nodeToIndexMapArray)
+                source_json, reaction_json, nodeToIndexMap, nodeToIndexMapArray, feature_extractor)
 
             features = []
             for i, j in enumerate(featureMatrix):
