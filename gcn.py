@@ -82,3 +82,23 @@ class GCNNet(torch.nn.Module):
             y_true, y_pred, average='macro')  # micro
 
         return (loss / len(loader.dataset)), accuracy_score(y_true, y_pred, normalize=True), precision, recall, f1score
+
+    def _testEarly(self, loader, criterion, DEVICE="cpu"):
+        loss, y_true, y_pred = 0, [], []
+        # Iterate in batches over the training/test dataset.
+        for data in loader:
+            data = data.to(DEVICE)
+            out = self.forward(data.x, data.edge_index, data.batch)
+            # Use the class with highest probability.
+            y_hat = data.y.cpu()
+
+            loss = loss + criterion(out.cpu(), y_hat).item()
+
+            y_true.extend(data.y.cpu().tolist())
+            y_pred.extend(out.argmax(dim=1).cpu().tolist())
+
+        # Precision, Recall, F1 score
+        precision, recall, f1score, _ = precision_recall_fscore_support(
+            y_true, y_pred, average='macro')  # micro
+
+        return (loss / len(loader.dataset)), accuracy_score(y_true, y_pred, normalize=True), precision, recall, f1score

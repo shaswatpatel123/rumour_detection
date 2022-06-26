@@ -63,7 +63,7 @@ else:
 args = {
     "path": DATASET_PATH,
     "num_of_node_features": 772,
-    "batch": 128,
+    "batch": 64,
     "save_dir": SAVE_DIR
 }
 
@@ -99,12 +99,12 @@ with open(os.path.join(TWEET_FEAT_DIR, "tweet_features.pickle"), "rb") as handle
     TWEET_FEAT = pickle.load(handle)
 
 
-def early_RD(model, topic, save_dir):
+def early_RD(model, topic, save_dir, criterion):
 
     total = {}
 
     print("Early RD Time")
-    for hour in tqdm([0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 36]):
+    for hour in tqdm([0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24, 36]):
         test_data = getEarlyRDTime3Label(
             hour, PHEME_DATASET, topic, TWEET_FEAT, global_feature_extractor)
 
@@ -121,10 +121,9 @@ def early_RD(model, topic, save_dir):
 
             test_list.append(Data(x=x, edge_index=e, y=category))
 
-        test_loader = DataLoader(test_list, batch_size=1)
+        test_loader = DataLoader(test_list, batch_size=64)
 
         model.eval()
-        criterion = torch.nn.CrossEntropyLoss()
         test_loss, test_acc, test_prec, test_recall, test_f1 = model._test(
             test_loader, criterion, DEVICE)
 
@@ -140,13 +139,11 @@ def early_RD(model, topic, save_dir):
         pickle.dump(total, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def early_RD_comment(model, topic, save_dir):
+def early_RD_comment(model, topic, save_dir, criterion):
 
     total = {}
     print("Early RD Comment")
-    comment_list = [i for i in range(2, 52, 2)]
-    comment_list.append(1)
-    for commentLimit in tqdm(comment_list):
+    for commentLimit in tqdm([1, 2, 4, 6, 8, 10, 15, 20, 30, 40, 50]):
         test_data = getEarlyRDComment3Label(
             commentLimit, PHEME_DATASET, topic, TWEET_FEAT, global_feature_extractor)
 
@@ -163,11 +160,10 @@ def early_RD_comment(model, topic, save_dir):
 
             test_list.append(Data(x=x, edge_index=e, y=category))
 
-        test_loader = DataLoader(test_list, batch_size=1)
+        test_loader = DataLoader(test_list, batch_size=64)
 
         model.eval()
-        criterion = torch.nn.CrossEntropyLoss()
-        test_loss, test_acc, test_prec, test_recall, test_f1 = model._test(
+        test_loss, test_acc, test_prec, test_recall, test_f1 = model._testEarly(
             test_loader, criterion, DEVICE)
 
         total[commentLimit] = {
@@ -306,7 +302,7 @@ for train, test in kf.split(directories):
         test_loss, test_acc, test_prec, test_recall, test_f1 = model._test(
             test_loader, criterion, DEVICE)
         progressBar.set_description(
-            f'Epoch: {epoch:03d}, Training loss : {loss:.4f}, Testing loss : {test_loss:.4f}, Train Acc: {train_acc*100:.2f}, Test Acc: {test_acc*100:.2f}, Test precision: {test_prec}, Test recall: {test_recall}, Test f1 score: {test_f1}')
+            f'Epoch: {epoch:03d}, Test Acc: {test_acc*100:.2f}, Test f1 score: {test_f1}')
 
         res = {
             "loss": test_loss,
@@ -358,9 +354,10 @@ for train, test in kf.split(directories):
     plt.clf()
 
     # Early RD
-    early_RD(BEST_MODEL, PurePath(directories[test[0]]).parts[-1], CURR_PATH)
+    early_RD(BEST_MODEL, PurePath(
+        directories[test[0]]).parts[-1], CURR_PATH, criterion)
     early_RD_comment(BEST_MODEL, PurePath(
-        directories[test[0]]).parts[-1], CURR_PATH)
+        directories[test[0]]).parts[-1], CURR_PATH, criterion)
 
 END_TIME = time.time()
 
@@ -395,7 +392,7 @@ for d in directories:
     with open(os.path.join(CURR_PATH, "comment_result.pickle"), "rb") as handle:
         comment_data = pickle.load(handle)
 
-    for hour in tqdm([0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 36]):
+    for hour in tqdm([0.00001, 0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24, 36]):
         total_early_time[hour] = {
             "loss": 0,
             "acc": 0,
@@ -409,9 +406,7 @@ for d in directories:
         for k, v in metrics.items():
             total_early_time[hour][k] = total_early_time[hour][k] + metrics[k]
 
-    comment_list = [i for i in range(2, 52, 2)]
-    comment_list.append(1)
-    for commentLimit in tqdm(comment_list):
+    for commentLimit in tqdm([1, 2, 4, 6, 8, 10, 15, 20, 30, 40, 50]):
         total_early_comment[commentLimit] = {
             "loss": 0,
             "acc": 0,
