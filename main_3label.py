@@ -124,7 +124,7 @@ def early_RD(model, topic, save_dir, criterion):
         test_loader = DataLoader(test_list, batch_size=64)
 
         model.eval()
-        test_loss, test_acc, test_prec, test_recall, test_f1 = model._test(
+        test_loss, test_acc, test_prec, test_recall, test_f1 = model._testEarly(
             test_loader, criterion, DEVICE)
 
         total[hour] = {

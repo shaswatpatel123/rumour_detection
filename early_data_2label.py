@@ -10,7 +10,12 @@ def getEarlyRDTime2Label(timeLimit, pheme_data, event, TWEET_FEAT, feature_extra
     timeLimit = timeLimit*3600
     return_list = []
 
-    dir = os.path.join(pheme_data, event)
+    directories = [os.path.join(pheme_data, o) for o in os.listdir(
+        pheme_data) if os.path.isdir(os.path.join(pheme_data, o))]
+
+    for d in directories:
+        if event in d:
+            dir = d
 
     # Traverse through rumour and non-rumour directories
     sub_dir = [os.path.join(dir, i) for i in os.listdir(
@@ -71,7 +76,12 @@ def getEarlyRDTime2Label(timeLimit, pheme_data, event, TWEET_FEAT, feature_extra
 def getEarlyRDComment2Label(commentLimit, pheme_data, event, TWEET_FEAT, feature_extractor):
     return_list = []
 
-    dir = os.path.join(pheme_data, event)
+    directories = [os.path.join(pheme_data, o) for o in os.listdir(
+        pheme_data) if os.path.isdir(os.path.join(pheme_data, o))]
+
+    for d in directories:
+        if event in d:
+            dir = d
 
     # Traverse through rumour and non-rumour directories
     sub_dir = [os.path.join(dir, i) for i in os.listdir(
