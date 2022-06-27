@@ -14,6 +14,10 @@ class GATNet2(torch.nn.Module):
                            heads=heads, dropout=dropout)
         self.gc2 = GATConv(hidden_channels*heads,
                            hidden_channels, heads=heads, dropout=dropout)
+        self.gc3 = GATConv(hidden_channels*heads,
+                           hidden_channels, heads=heads, dropout=dropout)
+#         self.gc4 = GATConv(hidden_channels*heads,
+#                            hidden_channels, heads=heads, dropout=dropout)
 
         self.dropout = dropout
         self.training = training
@@ -21,22 +25,31 @@ class GATNet2(torch.nn.Module):
                            (hidden_channels*heads / 2))
         self.lin2 = Linear((int)(hidden_channels*heads / 2), num_classes)
 
-        self.dropout = Dropout(p=0.3)
+        self.droput = dropout
+#         self.dropout = Dropout(p=0.3)
 
     def forward(self, x, edge_index, batch):
-        # x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.dropout(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = self.dropout(x)
         x = self.gc1(x, edge_index)
-        x = F.relu(x)
-        # x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.dropout(x)
+        x = F.elu(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = self.dropout(x)
         x = self.gc2(x, edge_index)
-        x = F.relu(x)
+        x = F.elu(x)
+#         x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = self.dropout(x)
+#         x = self.gc3(x, edge_index)
+#         x = F.relu(x)
+#         x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = self.dropout(x)
+#         x = self.gc4(x, edge_index)
+#         x = F.relu(x)
 
         x = global_max_pool(x, batch)
-        x = self.dropout(x)
+        x = F.dropout(x)
         x = self.lin1(x)
-        x = self.dropout(x)
+        x = F.dropout(x)
         x = self.lin2(x)
 
         return x
@@ -117,23 +130,25 @@ class GATNet3(torch.nn.Module):
         self.lin1 = Linear(hidden_channels*heads, (int)
                            (hidden_channels*heads / 2))
         self.lin2 = Linear((int)(hidden_channels*heads / 2), num_classes)
+        
+        self.dropout = dropout
 
-        self.dropout = Dropout(p=0.3)
+#         self.dropout = Dropout(p=0.3)
 
     def forward(self, x, edge_index, batch):
-        # x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.dropout(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = self.dropout(x)
         x = self.gc1(x, edge_index)
         x = F.elu(x)
-        # x = F.dropout(x, p=self.dropout, training=self.training)
-        x = self.dropout(x)
+        x = F.dropout(x, p=self.dropout, training=self.training)
+        # x = self.dropout(x)
         x = self.gc2(x, edge_index)
         x = F.elu(x)
 
         x = global_max_pool(x, batch)
-        x = self.dropout(x)
+        x = F.dropout(x)
         x = self.lin1(x)
-        x = self.dropout(x)
+        x = F.dropout(x)
         x = self.lin2(x)
 
         return x

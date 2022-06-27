@@ -63,7 +63,7 @@ else:
 args = {
     "path": DATASET_PATH,
     "num_of_node_features": 772,
-    "batch": 64,
+    "batch": 128,
     "save_dir": SAVE_DIR
 }
 
@@ -121,7 +121,7 @@ def early_RD(model, topic, save_dir, criterion):
 
             test_list.append(Data(x=x, edge_index=e, y=category))
 
-        test_loader = DataLoader(test_list, batch_size=64)
+        test_loader = DataLoader(test_list, batch_size=128)
 
         model.eval()
         test_loss, test_acc, test_prec, test_recall, test_f1 = model._testEarly(
@@ -160,7 +160,7 @@ def early_RD_comment(model, topic, save_dir, criterion):
 
             test_list.append(Data(x=x, edge_index=e, y=category))
 
-        test_loader = DataLoader(test_list, batch_size=64)
+        test_loader = DataLoader(test_list, batch_size=128)
 
         model.eval()
         test_loss, test_acc, test_prec, test_recall, test_f1 = model._testEarly(
