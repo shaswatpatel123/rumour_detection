@@ -96,3 +96,11 @@ def getReactions(t):
         reaction_json[reaction_id] = obj
 
     return reaction_json
+
+def topicCheck( topic ):
+    
+    if topic in ["putinmissing", "prince", "gurlitt", "ebola"]:
+        return True
+    
+    return False
+    

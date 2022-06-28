@@ -71,7 +71,7 @@ global_feature_extractor = FEATUREEXTRACTOR("vinai/bertweet-base", "cuda")
 
 BATCH_SIZE = int(args["batch"])
 PATH = args["save_dir"]
-LR = 5e-3
+LR = 5e-4
 WEIGHT_DECAY = 1e-3
 PATIENCE = 10
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -302,6 +302,7 @@ for train, test in kf.split(directories):
         }
 
         if AVG_RESULTS[avg_key]["f1score"] <= test_f1:
+            print( test_acc, " ", test_f1 )
             AVG_RESULTS[avg_key]["loss"] = test_loss
             AVG_RESULTS[avg_key]["acc"] = test_acc
             AVG_RESULTS[avg_key]["precision"] = test_prec

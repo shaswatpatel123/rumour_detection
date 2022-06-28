@@ -4,7 +4,7 @@ from sklearn.metrics import precision_recall_fscore_support
 import torch
 from torch_geometric.nn import GCNConv, GATConv, global_max_pool
 from torch.nn import Linear, Dropout
-
+import torch.nn.functional as F
 
 class GCNNet(torch.nn.Module):
     def __init__(self, num_node_features, hidden_channels=128, num_classes=2):
@@ -17,7 +17,6 @@ class GCNNet(torch.nn.Module):
         self.lin2 = Linear((int)(hidden_channels / 2),
                            (int)(hidden_channels / 4))
         self.out = Linear((int)(hidden_channels / 4), num_classes)
-        self.dropout = Dropout(p=0.3)
 
     def forward(self, x, edge_index, batch):
         x = self.conv1(x, edge_index)
@@ -31,11 +30,11 @@ class GCNNet(torch.nn.Module):
 
         x = global_max_pool(x, batch)
 
-        x = self.dropout(x)
+        x = F.dropout(x, p=0.3)
         x = self.lin1(x)
-        x = self.dropout(x)
+        x = F.dropout(x, p=0.3)
         x = self.lin2(x)
-        x = self.dropout(x)
+        x = F.dropout(x, p=0.3)
         x = self.out(x)
 
         return x
