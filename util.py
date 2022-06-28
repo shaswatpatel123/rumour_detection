@@ -100,7 +100,7 @@ def getReactions(t):
 def topicCheck( topic ):
     
     if topic in ["putinmissing", "prince", "gurlitt", "ebola"]:
-        return True
+        return False
     
-    return False
+    return True
     
