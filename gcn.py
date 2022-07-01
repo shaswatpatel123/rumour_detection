@@ -30,11 +30,11 @@ class GCNNet(torch.nn.Module):
 
         x = global_max_pool(x, batch)
 
-        x = F.dropout(x, p=0.3)
+#         x = F.dropout(x, p=0.3)
         x = self.lin1(x)
-        x = F.dropout(x, p=0.3)
+#         x = F.dropout(x, p=0.3)
         x = self.lin2(x)
-        x = F.dropout(x, p=0.3)
+#         x = F.dropout(x, p=0.3)
         x = self.out(x)
 
         return x

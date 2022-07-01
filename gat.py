@@ -32,9 +32,9 @@ class GATNet2(torch.nn.Module):
         x = F.relu(x)
 
         x = global_max_pool(x, batch)
-        x = F.dropout(x, p=0.3)
+#         x = F.dropout(x, p=0.3)
         x = self.lin1(x)
-        x = F.dropout(x, p=0.3)
+#         x = F.dropout(x, p=0.3)
         x = self.lin2(x)
 
         return x
@@ -127,9 +127,9 @@ class GATNet3(torch.nn.Module):
         x = F.elu(x)
 
         x = global_max_pool(x, batch)
-        x = F.dropout(x, p=0.3)
+#         x = F.dropout(x, p=0.3)
         x = self.lin1(x)
-        x = F.dropout(x, p=0.3)
+#         x = F.dropout(x, p=0.3)
         x = self.lin2(x)
 
         return x
