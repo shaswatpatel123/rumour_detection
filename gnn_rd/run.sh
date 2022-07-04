@@ -14,14 +14,17 @@ tar -xf ./PHEME_veracity.tar.bz2
 rm -rf ./PHEME_veracity.tar.bz2
 rm -rf ./1
 
+wget https://s3-eu-west-1.amazonaws.com/pfigshare-u-files/6453753/phemernrdataset.tar.bz2
+tar -xf ./phemernrdataset.tar.bz2
+rm -rf phemernrdataset.tar.bz2
+
 wget https://github.com/prasmussen/gdrive/releases/download/2.1.1/gdrive_2.1.1_linux_386.tar.gz
 tar -xf ./gdrive_2.1.1_linux_386.tar.gz
 rm -rf gdrive_2.1.1_linux_386.tar.gz
 
 mkdir -p logger
 
-python ./tweet_to_feature.py ./all-rnr-annotated-threads ./
-
+# python ./tweet_to_feature.py ./all-rnr-annotated-threads ./
 
 python ./data_prep_3label.py ./all-rnr-annotated-threads ./data/pheme9/3label > ./logger/3labelprep.txt
 python ./main_3label.py ./data/pheme9/3label/unaugmented ./model/pheme9/3label/unaugmented/ GCN 100 ./data/pheme9/3label/pheme ./ > ./logger/unaugmented_3label_gcn.txt
