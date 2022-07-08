@@ -155,7 +155,15 @@ def getGDataAugmented(tweet_data, augmented_data, feature_extractor):
     gdata['y'] = tweet_data['label']
 
     edge_list = tweet_data["edgeList"]
-    edge_list = np.array(edge_list).T.tolist()
+    edge_list = np.array(edge_list).T # .tolist()
+    
+    if len(edge_list) == 0:
+        edge_list = [ [], [] ]
+    
+    bottom_up_edge_list = np.array( [ edge_list[1], edge_list[0] ] )
+    edge_list = np.concatenate( ( edge_list, bottom_up_edge_list ), axis=1 )
+    edge_list = edge_list.tolist()
+    
     gdata['edge_list'] = edge_list
 
     return gdata
@@ -163,10 +171,18 @@ def getGDataAugmented(tweet_data, augmented_data, feature_extractor):
 
 def getGData(data, TWEET_FEAT):
     gdata = {}
-
     edge_list = data["edgeList"]
-    edge_list = np.array(edge_list).T.tolist()
-
+    edge_list = np.array(edge_list).T # .tolist()
+    
+    # assert len(edge_list) != 0
+    if len(edge_list) == 0:
+        edge_list = [ [], [] ]
+        
+    bottom_up_edge_list = np.array( [ edge_list[1], edge_list[0] ] )
+    edge_list = np.concatenate( ( edge_list, bottom_up_edge_list ), axis=1 )
+    
+    edge_list = edge_list.tolist()
+    
     features = []
     tweetMatrix = data["tweetIDList"]
     for i, j in enumerate(data['featureMatrix']):

@@ -11,10 +11,10 @@ from feature_extractor import *
 import copy
 from tqdm import tqdm
 
-aug = naw.ContextualWordEmbsAug(model_path='vinai/bertweet-base', aug_p=0.20, device="cuda", stopwords=["@USER", "HTTPURL"])
+# aug = naw.ContextualWordEmbsAug(model_path='vinai/bertweet-base', aug_p=0.20, device="cuda", stopwords=["@USER", "HTTPURL"])
+# aug = naw.ContextualWordEmbsAug(model_path='vinai/bertweet-base', aug_p=0.20, device="cuda")
 
-
-def nlpAugmentation(json_file, num, feat_extractor, p_commets_aug=0.47):
+def nlpAugmentation(json_file, num, feat_extractor, p_commets_aug=0.47, aug=None):
     res = []
 
     with open(json_file, encoding="utf8") as ofile:
@@ -63,6 +63,7 @@ def get_probability_for_tweets_selection(thread):
     for tweet in thread["featureMatrix"]:
         strToken = tweet[0].replace("@USER", "").replace("HTTPURL", "")
         strToken = tk.tokenize(strToken)
+        # strToken = tk.tokenize(tweet[0])
         probs.append(len(strToken))
 
     probs.pop(0)  # Remove source
@@ -71,7 +72,7 @@ def get_probability_for_tweets_selection(thread):
 
 
 # +
-def nlpAugmentationImproved(json_file, num, feat_extractor, p_commets_aug=0.47):
+def nlpAugmentationImproved(json_file, num, feat_extractor, p_commets_aug=0.47, aug=None):
     res = []
     with open(json_file, encoding="utf8") as ofile:
         data = json.load(ofile)
@@ -142,17 +143,17 @@ def nlpAugmentationImproved(json_file, num, feat_extractor, p_commets_aug=0.47):
 
 # -
 
-def dataAugmentation(data_list, num, rem, feat_extractor, p_commets_aug=0.47, improved=False):
+def dataAugmentation(data_list, num, rem, feat_extractor, p_commets_aug=0.47, improved=False, aug=None):
     graphList = []
     if num >= 1:
         print("NUM: ", num)
         for tweet in tqdm(data_list):
             if improved == False:
                 augmented_data = nlpAugmentation(
-                    tweet, num, feat_extractor, p_commets_aug)
+                    tweet, num, feat_extractor, p_commets_aug, aug)
             else:
                 augmented_data = nlpAugmentationImproved(
-                    tweet, num, feat_extractor, p_commets_aug)
+                    tweet, num, feat_extractor, p_commets_aug, aug)
 
             graphList.extend(augmented_data)
     
@@ -163,10 +164,10 @@ def dataAugmentation(data_list, num, rem, feat_extractor, p_commets_aug=0.47, im
     for tweet in tqdm(rem_data):
         if improved == False:
             augmented_data = nlpAugmentation(
-                tweet, 1, feat_extractor, p_commets_aug)
+                tweet, 1, feat_extractor, p_commets_aug, aug)
         else:
             augmented_data = nlpAugmentationImproved(
-                tweet, 1, feat_extractor, p_commets_aug)
+                tweet, 1, feat_extractor, p_commets_aug, aug)
         graphList.extend(augmented_data)
         
     print( len(graphList) - oldLenght )
@@ -174,7 +175,7 @@ def dataAugmentation(data_list, num, rem, feat_extractor, p_commets_aug=0.47, im
     return graphList
 
 
-def getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_PERC=0.47):
+def getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_PERC=0.47, aug=None):
     if improved:
         augmented_save_path = os.path.join(SAVE_DIR, "improved")
     else:
@@ -226,7 +227,7 @@ def getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_P
                 f"\nAugmenting entire True labelled tweets {num - 1} and randomly audmenting {rem} tweets")
 
             graphList.extend(dataAugmentation(
-                trueLabel, num - 1, rem, feat_extractor, AUG_PERC, improved))
+                trueLabel, num - 1, rem, feat_extractor, AUG_PERC, improved, aug))
 
         if len(falseLabel) < maximum and len(falseLabel) != 0:
             num = floor(maximum / len(falseLabel))
@@ -236,7 +237,7 @@ def getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_P
                 f"\nAugmenting entire False labelled tweets {num - 1} and randomly audmenting {rem} tweets")
 
             graphList.extend(dataAugmentation(
-                falseLabel, num - 1, rem, feat_extractor, AUG_PERC, improved))
+                falseLabel, num - 1, rem, feat_extractor, AUG_PERC, improved, aug))
             # print( num, k, len(feature_index), len(feature_index_choosen), len(data["featureMatrix"]))
 
         if len(unverifiedLabel) < maximum and len(unverifiedLabel) != 0:
@@ -247,7 +248,7 @@ def getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_P
                 f"\nAugmenting entire Unverified labelled tweets {num - 1} and randomly audmenting {rem} tweets")
 
             graphList.extend(dataAugmentation(
-                unverifiedLabel, num - 1, rem, feat_extractor, AUG_PERC, improved))
+                unverifiedLabel, num - 1, rem, feat_extractor, AUG_PERC, improved, aug))
 
         pickle_path = os.path.join(augmented_save_path, event, 'graph.pickle')
         with open(pickle_path, 'wb') as handle:
@@ -256,7 +257,7 @@ def getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_P
         print("*" * 60)
 
 
-def getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_PERC=0.47):
+def getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_PERC=0.47, aug=None):
     data = {}
 
     if improved:
@@ -304,7 +305,7 @@ def getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_P
                 f"\nAugmenting entire Rumour label tweets {num - 1} and randomly augmenting {rem} tweets")
 
             graphList.extend(dataAugmentation(
-                rumourLabel, num - 1, rem, feat_extractor, AUG_PERC, improved))
+                rumourLabel, num - 1, rem, feat_extractor, AUG_PERC, improved, aug))
 
         if len(nonrumourLabel) < maximum and len(nonrumourLabel) != 0:
             num = floor(maximum / len(nonrumourLabel))
@@ -314,7 +315,7 @@ def getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, improved, feat_extractor, AUG_P
                 f"\nAugmenting entire Non-rumour label tweets {num - 1} and randomly augmenting {rem} tweets")
 
             graphList.extend(dataAugmentation(
-                nonrumourLabel, num - 1, rem, feat_extractor, AUG_PERC, improved))
+                nonrumourLabel, num - 1, rem, feat_extractor, AUG_PERC, improved, aug))
 
         pickle_path = os.path.join(
             improved_data_save_path, event, 'graph.pickle')

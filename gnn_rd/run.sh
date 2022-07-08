@@ -1,11 +1,11 @@
 set -e
 
-pip install emoji
-pip install transformers
-pip install tabulate
-pip install nlpaug
-pip install sentencepiece
-pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.11.0+cu115.html
+# pip install emoji
+# pip install transformers
+# pip install tabulate
+# pip install nlpaug
+# pip install sentencepiece
+# pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.11.0+cu115.html
 
 wget https://ndownloader.figshare.com/articles/6392078/versions/1
 unzip ./1

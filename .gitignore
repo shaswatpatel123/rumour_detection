@@ -1,5 +1,13 @@
 gnn_rd/logger/
+gnn_rd/logger30/
+gnn_rd/logger70/
 gnn_rd/model/
+gnn_rd/model30/
+gnn_rd/model70/
+gnn_rd/data30/
+gnn_rd/data70/
+gnn_rd/experiment/
+gnn_rd/.ipynb_checkpoints/
 gnn_rd/tweet_features.pickle
 gnn_rd/data/
 gnn_rd/__pycache__/

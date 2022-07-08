@@ -32,9 +32,22 @@ if len(sys.argv) >= 4:
     TWEET_FEAT_DIR = sys.argv[3]
 else:
     TWEET_FEAT_DIR = "./"
+    
+if len(sys.argv) >= 5:
+    aug_p = float( sys.argv[4] )
+else:
+    aug_p = 0.20
+    
+if len(sys.argv) >= 6:
+    tweet_p = float( sys.argv[5] )
+else:
+    tweet_p = 0.20
 
 
 global_feature_extractor = FEATUREEXTRACTOR("vinai/bertweet-base", "cuda")
+
+# global aug
+aug = naw.ContextualWordEmbsAug(model_path='vinai/bertweet-base', aug_p=aug_p, device="cuda", stopwords=["@USER", "HTTPURL"])
 
 with open(os.path.join(TWEET_FEAT_DIR, "tweet_features.pickle"), "rb") as handle:
     TWEET_FEAT = pickle.load(handle)
@@ -171,10 +184,9 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
 print()
 print("Augmented data")
 print()
-getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, False,
-                       global_feature_extractor)
+getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, False,global_feature_extractor, tweet_p, aug)
 
 print()
 print("Improved Augmented data")
 print()
-getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, True, global_feature_extractor)
+getAugmentedData2Label(SAVE_DIR, TWEET_FEAT, True, global_feature_extractor, tweet_p, aug)

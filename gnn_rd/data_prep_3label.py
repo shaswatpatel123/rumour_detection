@@ -32,8 +32,22 @@ if len(sys.argv) >= 4:
 else:
     TWEET_FEAT_DIR = "./"
 
+if len(sys.argv) >= 5:
+    aug_p = float( sys.argv[4] )
+else:
+    aug_p = 0.20
+    
+if len(sys.argv) >= 6:
+    tweet_p = float( sys.argv[5] )
+else:
+    tweet_p = 0.20
+    
+
 
 global_feature_extractor = FEATUREEXTRACTOR("vinai/bertweet-base", "cuda")
+
+# global aug
+aug = naw.ContextualWordEmbsAug(model_path='vinai/bertweet-base', aug_p=aug_p, device="cuda", stopwords=["@USER", "HTTPURL"])
 
 with open(os.path.join(TWEET_FEAT_DIR, "tweet_features.pickle"), "rb") as handle:
     TWEET_FEAT = pickle.load(handle)
@@ -97,19 +111,11 @@ for dir in directories:
             # Structure
             structure_json = getStructure(t)
 
-            edgeList, nodeToIndexMap, nodeToIndexMapArray = create_graph_with_map(
-                structure_json, id)
+
 
             # Annotations
             real_label = getAnnotation(t)
             label_json[id] = real_label
-
-            tweetData = {
-                "edgeList": edgeList,
-                "nodeToIndexMap": nodeToIndexMap,
-                "nodeToIndexMapArray": nodeToIndexMapArray,
-                "label": real_label
-            }
 
             # Feature Matrix
             # Source folder
@@ -117,6 +123,15 @@ for dir in directories:
             # Reaction Folder
             reaction_json = getReactions(t)
 
+            edgeList, nodeToIndexMap, nodeToIndexMapArray = create_graph_with_map(structure_json, id, source_json, reaction_json)
+            
+            tweetData = {
+                "edgeList": edgeList,
+                "nodeToIndexMap": nodeToIndexMap,
+                "nodeToIndexMapArray": nodeToIndexMapArray,
+                "label": real_label
+            }
+            
             tweetData["featureMatrix"], tweetData["tweetIDList"] = create_feature_matrix(
                 source_json, reaction_json, nodeToIndexMap, nodeToIndexMapArray, global_feature_extractor)
 
@@ -184,10 +199,10 @@ for event in os.listdir(os.path.join(SAVE_DIR, "pheme")):
 print()
 print("Augmented data")
 print()
-getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, False, global_feature_extractor, 0.15)
+getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, False, global_feature_extractor, tweet_p, aug)
 
 
 print()
 print("Improved Augmented data")
 print()
-getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, True, global_feature_extractor, 0.15)
+getAugmentedData3Label(SAVE_DIR, TWEET_FEAT, True, global_feature_extractor, tweet_p, aug)
