@@ -43,10 +43,13 @@ def nlpAugmentation(json_file, num, p_commets_aug=0.15):
     source_augmented_twetes = aug.augment(
         data["featureMatrix"][0], n=num)  # Source
 
-    augmented_tweets = np.array(augmented_tweets).reshape(
-        num, int(ceil(len(feature_index) * p_commets_aug)))
-    feature_index_choosen = np.array(feature_index_choosen).reshape(
-        num, int(ceil(len(feature_index) * p_commets_aug)))
+    if num == 1:
+        source_augmented_twetes = [ source_augmented_twetes ]
+        
+    assert len(source_augmented_twetes) == num
+    
+    augmented_tweets = np.array(augmented_tweets).reshape(num, k)
+    feature_index_choosen = np.array(feature_index_choosen).reshape(num, k)
 
     for f_idx, aug_source_tweet, aug_tweet in zip(feature_index_choosen, source_augmented_twetes, augmented_tweets,):
         tmp = copy.deepcopy(data)
@@ -80,9 +83,10 @@ def nlpAugmentationImproved(json_file, num, p_commets_aug=0.15):
     # Extract 0.15% of comments to augment
     probs = get_probability_for_tweets_selection(data)
 
-    k = int(ceil((len(data["featureMatrix"]) - 1) * p_commets_aug))
     feature_index = [i for i in range(1, len(data["featureMatrix"]))]
 
+    k = int( ceil( len(feature_index) * p_commets_aug ) )
+    
     if len(feature_index) != 0:
 
         feature_index_choosen = []
@@ -100,11 +104,14 @@ def nlpAugmentationImproved(json_file, num, p_commets_aug=0.15):
         source_augmented_twetes = aug.augment(
             data["featureMatrix"][0], n=num)  # Source
 
+        if num == 1:
+            source_augmented_twetes = [ source_augmented_twetes ]
+
+        assert len(source_augmented_twetes) == num
+        
         # Change augmented_tweets => 1xint(floor(len(data["featureMatrix"]) * 0.15)) * num => numxint(floor(len(data["featureMatrix"]) * 0.15))
-        augmented_tweets = np.array(augmented_tweets).reshape(
-            num, int(ceil((len(data["featureMatrix"]) - 1) * p_commets_aug)))
-        feature_index_choosen = np.array(feature_index_choosen).reshape(
-            num, int(ceil((len(data["featureMatrix"]) - 1) * p_commets_aug)))
+        augmented_tweets = np.array(augmented_tweets).reshape(num, k)
+        feature_index_choosen = np.array(feature_index_choosen).reshape(num, k)
 
         for f_idx, aug_source_tweet, aug_tweet in zip(feature_index_choosen, source_augmented_twetes, augmented_tweets,):
             tmp = copy.deepcopy(data)
@@ -115,8 +122,13 @@ def nlpAugmentationImproved(json_file, num, p_commets_aug=0.15):
             res.append( tmp )
 
     else:
-        source_augmented_twetes = aug.augment(
-            data["featureMatrix"][0], n=num)  # Source
+        source_augmented_twetes = aug.augment(data["featureMatrix"][0], n=num)  # Source
+        
+        if num == 1:
+            source_augmented_twetes = [ source_augmented_twetes ]
+
+        assert len(source_augmented_twetes) == num
+        
         for s in source_augmented_twetes:
             tmp = copy.deepcopy(data)
             tmp["featureMatrix"][0] = s
