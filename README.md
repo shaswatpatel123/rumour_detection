@@ -4,11 +4,16 @@ This repository contains the code for our paper "Rumour detection using graph ne
 ## BERT-based rumour detection pipeline
 Our first paper "Leveraging User Comments in Tweets for Rumor Detection" uses comments and BERT(BERT, RoBERTa, ALBERT, and DistilBERT) for classifying tweets into rumour/non-rumour. We extended the pipeline to include multi-label classification: true/false/unverifed.
 
+The data preparation file merges the source and comments in an array which is then feed to the models as a long-sequence.
+
 ## GNN-based rumour detection pipeline
 Our second paper "Rumour detection using graph neural network and oversampling in benchmark Twitter dataset" uses BERT to extract textual embeddings, and GNN to capture spatial relations and propogation information.
 
+The data preparation files creates: (i) adjacency list, and (ii) node-level features(text). It is easy to modify and reused by the community for future research.
 
 Both the techniques also include our new data augmentation pipeline to oversample the under-represented classes in the dataset which has shown significant improvement. We also include pipeline for <b>early rumour detection</b>. We have trained and tested our approach on PHEME5 and PHEME9 datasets.
+
+Feel free to reach out to us for any help via email or issue.
 
 # Cite
 ```
